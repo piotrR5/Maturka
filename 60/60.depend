@@ -1,0 +1,6 @@
+# depslib dependency file v1.0
+1663716154 source:c:\users\jakub\desktop\cpp\matura infa\60\main.cpp
+	<iostream>
+	<fstream>
+	<vector>
+

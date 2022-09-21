@@ -1,0 +1,10 @@
+# depslib dependency file v1.0
+1663696518 source:c:\users\jakub\desktop\cpp\matura infa\59\main.cpp
+	<iostream>
+	<fstream>
+	<math.h>
+	<vector>
+	<algorithm>
+	<cstdlib>
+	<unordered_set>
+

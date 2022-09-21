@@ -1,106 +1,119 @@
- #include <iostream>
- #include <fstream>
- #include <vector>
- #include <string>
- #include <algorithm>
+#include <iostream>
+#include <fstream>
+#include <vector>
 
- using namespace std;
+using namespace std;
 
- void zad1(const vector<int>& vec){
-    int foo=2;
-    int n=0;
-    for(int i=vec.size()-1;i>=0;i--)
+void znajdz_dzielniki(int liczba,vector<int>&dzielniki)
+{
+    for(int i=1; i<=liczba; i++)
     {
-        if(vec[i]<1000){
-            if(foo){
-                cout<<vec[i]<<endl;
-                foo--;
+        if(liczba%i==0 && i!=1)
+        {
+            dzielniki.push_back(i);
+        }
+    }
+}
+
+void zad_2(int liczba,vector<int>&dzielniki)
+{
+    int liczba_dzielnikow=0;
+    for(int i=1; i<=liczba; i++)
+    {
+        if(liczba%i==0)
+        {
+            liczba_dzielnikow++;
+        }
+    }
+
+    if(liczba_dzielnikow==18)
+    {
+        cout<<liczba<<endl;
+        for(int i=1; i<=liczba; i++)
+        {
+            if(liczba%i==0)
+            {
+                cout<<i<<" ";
             }
-            n++;
         }
-    }
-    cout<<n<<endl;
-}
-
-vector<int> getDivisors(int n){
-    vector<int>ret;
-    for(int i=1;i*i<=n;i++){
-        if(i*i==n){
-            ret.push_back(i);
-            sort(ret.begin(),ret.end());
-            return ret;
-        }
-        if(n%i==0){
-            ret.push_back(i);
-            ret.push_back(n/i);
-        }
-    }
-    sort(ret.begin(),ret.end());
-    return ret;
-}
-
-void zad2(const vector<int>& vec){
-    for(auto i:vec){
-        vector<int>d=getDivisors(i);
-        if(d.size()==18){
-            cout<<i<<" ";
-
-            for(auto j:d)cout<<j<<" ";
-            cout<<endl;
-        }
+        cout<<endl;
     }
 }
 
-bool areRelativelyPrime(const vector<int>& d1, const vector<int>& d2){
-    for(auto i:d1){
-        for(auto j:d2)if(i==j)return false;
+bool porownywanie_dzielnikow(vector<int>dzielniki_1, vector<int>dzielniki_2)
+{
+    for(int i=0; i<dzielniki_1.size(); i++)
+    {
+        for(int j=0; j<dzielniki_2.size(); j++)
+        {
+            if(dzielniki_1[i]==dzielniki_2[j]) return false;
+        }
     }
     return true;
 }
 
-void zad3(const vector<int>& vec){
-    int n=0;
-    vector<vector<int>>d;
-    for(auto i:vec)d.push_back(getDivisors(i));
-    for(auto& i:d)i.erase(i.begin(),i.begin()+1);
+int main()
+{
+    fstream plik, odp;
+    plik.open("liczby.txt");
+    odp.open("odp.txt");
 
-    bool didBreak=false;
-
-    for(int i=0;i<vec.size();i++){
-        didBreak=false;
-        for(int j=0;j<vec.size();j++){
-            if(i==j)continue;
-            if(!areRelativelyPrime(d[i], d[j])){
-                didBreak=true;
-                //cout<<"!!!"<<vec[i]<<" i "<<vec[j]<<" nie sa wspolnie pierwsze\n";
-                break;
-            }
-            //cout<<vec[i]<<" i "<<vec[j]<<"sa wspolnie pierwsze"<<endl;
-        }
-        if(vec[i]>n && !didBreak){
-            n=vec[i];
-            //cout<<vec[i]<<" jest pierwsze wzgledem kazdej liczby"<<endl;
-        }
-        didBreak=true;
+    vector<int>liczby;
+    for(int i=0; i<200; i++)
+    {
+        int liczba;
+        plik>>liczba;
+        liczby.push_back(liczba);
     }
 
-    cout<<n<<endl;
-    // for(auto i:d){
-    //     for(auto j:i)cout<<j<<" ";
-    //     cout<<endl;
-    // }
-}
+    int l_1=-1, l_2=-1, odp_1=0;
 
-int main(){
-    fstream file;
-    file.open("liczby.txt");
-    string temp;
-    vector<int>vec;
-    while(getline(file, temp)){
-        vec.push_back(stoi(temp));
+    for(int i=199; i>0; i--)
+    {
+        if(liczby[i]<1000)
+        {
+            odp_1++;
+            if(l_1<0) l_1=liczby[i];
+            else if(l_2<0) l_2=liczby[i];
+        }
     }
 
-    zad1(vec);//git
-    zad2(vec);//git
-    zad3(vec);
+    vector<int>dzielniki;
+    cout<<odp_1<<" "<<l_1<<" "<<l_2<<endl;
+
+    for(int i=0; i<200; i++)
+    {
+        zad_2(liczby[i],dzielniki);
+    }
+
+    int max_liczba_pierwsza=0;
+
+    vector<vector<int>> pre_robione_dzielniki;
+    for(int i=0; i<200; i++)
+    {
+        vector<int>dummy;
+        znajdz_dzielniki(liczby[i],dummy);
+        pre_robione_dzielniki.push_back(dummy);
+    }
+
+    for(int i=0; i<200; i++)
+    {
+        bool czy_wspolny_dzielnik=false;
+        for(int j=0; j<200; j++)
+        {
+            if(j==i) break;
+            czy_wspolny_dzielnik=!porownywanie_dzielnikow(pre_robione_dzielniki[i], pre_robione_dzielniki[j]);
+            if(czy_wspolny_dzielnik==true)break;
+        }
+        if(czy_wspolny_dzielnik==false)
+        {
+            if(liczby[i]>max_liczba_pierwsza)max_liczba_pierwsza=liczby[i];
+        }
+    }
+
+    cout<<endl<<endl<<max_liczba_pierwsza;
+
+    plik.close();
+    odp.close();
+    return 0;
 }

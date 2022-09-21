@@ -1,92 +1,128 @@
- 
 #include <iostream>
 #include <fstream>
-#include <algorithm>
-#include <vector>
 #include <string>
+#include <vector>
 
 using namespace std;
 
-int _10to8(int n){
-    string foo;
-    while(n){
-        foo+=(n%8+'0');
+string na_osemkowy(string liczba)
+{
+    int liczba_int=stoi(liczba);
+    string ret;
 
-        n/=8;
+    while(liczba_int>1)
+    {
+        ret+=to_string(liczba_int%8);
+        liczba_int/=8;
     }
-    return stoi(string(foo.rbegin(), foo.rend()));
+    //cout<<ret<<endl;
+    return ret;
 }
 
-int main(){
+int main()
+{
+    fstream plik1, plik2;
+    plik1.open("liczby1.txt");
+    plik2.open("liczby2.txt");
 
-    fstream file;
-    vector<int>l1,l2;
-    string temp;
+    vector<string>liczby_osemkowe;
+    vector<int>liczby_dziesietne;
+    string max_osemkowa, min_osemkowa;
+    int max_osemkowa_int=0, min_osemkowa_int=999999;
 
-    file.open("liczby1.txt");
-    while(getline(file,temp)){
-        l1.push_back(stoi(temp,nullptr,8));
+    for(int i=0; i<1000; i++)
+    {
+        string liczba;
+        int liczba_int;
+        plik1>>liczba;
+        liczba_int=stoi(liczba,nullptr,8);
+
+        if(liczba_int>max_osemkowa_int)
+        {
+            max_osemkowa_int=liczba_int;
+            max_osemkowa=liczba;
+        }
+
+        if(liczba_int<min_osemkowa_int)
+        {
+            min_osemkowa_int=liczba_int;
+            min_osemkowa=liczba;
+        }
+
+        liczby_osemkowe.push_back(liczba);
     }
-    file.close();
-    file.open("liczby2.txt");
-    while(getline(file,temp)){
-        l2.push_back(stoi(temp));
-    }
-    file.close();
 
-//zad1
-    int max=0,min=1000000;
-    for(auto i:l1){
-        if(i>max)max=i;
-        if(i<min)min=i;
+    for(int i=0; i<1000; i++)
+    {
+        int liczba;
+        plik2>>liczba;
+        liczby_dziesietne.push_back(liczba);
     }
-    cout<<"zad1: "<<_10to8(min)<<" "<<_10to8(max)<<endl;
 
-//zad2
-    int firstElement;
-    int maxLen=0;
-    int len=1;
-    for(int i=1;i<1000;i++){
-        if(l2[i]>=l2[i-1])len++;
-        else{
-            if(len>=maxLen){
-                maxLen=len;
-                //cout<<"["<<i-len<<endl;
-                firstElement=l2[i-len]; 
-            }
-            len=1;
-            continue;
+    cout<<min_osemkowa<<" "<<max_osemkowa<<endl;
+
+    int ciag_start=0, ciag_len=1;
+    int max_ciag_start=0, max_ciag_len=0;
+
+    for(int i=1; i<1000; i++)
+    {
+        ciag_len++;
+        if(liczby_dziesietne[i]<liczby_dziesietne[i-1])
+        {
+            ciag_start=i;
+            ciag_len=1;
+        }
+        if(ciag_len>max_ciag_len)
+        {
+            max_ciag_len=ciag_len;
+            max_ciag_start=ciag_start;
         }
     }
-    cout<<"zad2: "<<firstElement<<" "<<maxLen<<endl;
 
-//zad3
-    int a=0,b=0;
-    for(int i=0;i<1000;i++){
-        //cout<<"["<<l1[i]<<" "<<l2[i]<<"]";
-        if(l1[i]==l2[i]){
-            //cout<<" a ";
-            a++;
-        }
-        if(l1[i]>l2[i]){
-            //cout<<" b ";
-            b++;
-        }
-        //cout<<"\n";
+    cout<<liczby_dziesietne[max_ciag_start]<<" "<<max_ciag_len<<endl;
+
+    int taka_sama_wartosc=0, wieksza_wartosc=0;
+
+    for(int i=0; i<1000; i++)
+    {
+        int dummy;
+        dummy=stoi(liczby_osemkowe[i],nullptr,8);
+        if(liczby_dziesietne[i]==dummy) taka_sama_wartosc++;
+        if(liczby_dziesietne[i]<dummy) wieksza_wartosc++;
     }
 
-    cout<<"zad3: "<<a<<" "<<b<<endl;
+    cout<<taka_sama_wartosc<<" "<<wieksza_wartosc<<endl;
 
-//zad4
-    int n6=0, n6_8=0;
-    for(auto i:l2){
-        string foo=to_string(i);
-        string foo8=to_string(_10to8(i));
-        for(auto j:foo)if(j=='6')n6++;
-        for(auto j:foo8)if(j=='6')n6_8++;
+    vector<string>liczby_dziesietne_string;
+    for(int i=0; i<1000; i++)
+    {
+        liczby_dziesietne_string.push_back(to_string(liczby_dziesietne[i]));
     }
-    cout<<"zad4: "<<n6<<" "<<n6_8<<endl;
 
+    int liczba_szostek=0, liczba_szostek_gdyby_8=0;
 
+    for(int i=0; i<1000; i++)
+    {
+        for(int j=0; j<liczby_dziesietne_string[i].size(); j++)
+        {
+            if(liczby_dziesietne_string[i][j]=='6') liczba_szostek++;
+
+        }
+
+        string liczba_w_8=na_osemkowy(liczby_dziesietne_string[i]);
+
+        for(int j=0; j<liczba_w_8.size(); j++)
+        {
+            if(liczba_w_8[j]=='6') liczba_szostek_gdyby_8++;
+        }
+
+    }
+
+    cout<<liczba_szostek<<" "<<liczba_szostek_gdyby_8<<endl;
+
+    cout<<endl<<endl<<"chyba blad w odp od CKE"<<endl;
+
+    plik1.close();
+    plik2.close();
     return 0;
 }

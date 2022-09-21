@@ -1,14 +1,53 @@
 #include <iostream>
 #include <fstream>
-#include <string.h>
+#include <math.h>
 #include <vector>
-#include <map>
 #include <algorithm>
+#include <cstdlib>
 #include <unordered_set>
 
 using namespace std;
 
+int odwroc_liczbe(int liczba)
+{
+    int copy_=liczba, length=0;
+    while(copy_>0)
+    {
+        copy_/=10;
+        length++;
+    }
+    char liczba_s[length];
+    itoa(liczba,liczba_s,10);
 
+    int ret=0;
+    for(int i=length-1; i>=0; i--)
+    {
+        ret*=10;
+        ret+=(int)liczba_s[i]-48;
+    }
+
+    return ret;
+}
+
+bool czy_palindrom(int liczba)
+{
+    int copy_=liczba, length=0;
+    while(copy_>0)
+    {
+        copy_/=10;
+        length++;
+    }
+    char liczba_s[length];
+    itoa(liczba,liczba_s,10);
+
+        for(int i=0; i<length/2; i++)
+        {
+            if(liczba_s[i]!=liczba_s[length-1-i]) return false;
+        }
+        return true;
+
+    return false;
+}
 
 bool zad1(uint64_t n){
     unordered_set<int>d;
@@ -22,94 +61,93 @@ bool zad1(uint64_t n){
         }
     }
     if(d.size()==3){
-        //for(auto i:d)cout<<i<<" ";
-        //cout<<endl;
         return true;
     }
     return false;
 }
 
-bool isPalindrome(string n){
-    for(int i=0;i<n.size()/2;i++){
-        if(n[i]!=n[n.size()-1-i])return false;
+int iloczyn_cyfr(int liczba)
+{
+    int copy_=liczba, length=0;
+    while(copy_>0)
+    {
+        copy_/=10;
+        length++;
     }
-    return true;
+    char liczba_s[length];
+    itoa(liczba,liczba_s,10);
+
+    int wymnozona_liczba=1;
+
+    for(int i=0; i<length; i++)
+    {
+        wymnozona_liczba*=(int)liczba_s[i]-48;
+    }
+    return wymnozona_liczba;
 }
 
+int main()
+{
+    fstream plik, odp;
 
-int main(){
+    plik.open("liczby.txt");
+    odp.open("wyniki_liczby.txt");
 
+    vector<int>liczby;
 
-    fstream file;
-    file.open("liczby.txt");
-    vector<string>data;
-    string temp;
-    while(getline(file, temp))data.push_back(temp);
+    int odp_1=0;
 
+    for(int i=0; i<1000; i++)
+    {
+        int liczba;
+        plik>>liczba;
+        liczby.push_back(liczba);
 
-//zad1
-
-
-    int _1=0;
-    for(auto& i:data){
-        uint64_t foo=stoi(i);
-        if(foo%2==0)continue;
-        if(zad1(foo))_1++;
+        if(zad1(liczba)==true && liczba%2==1) odp_1++;
     }
-    cout<<"zad1: "<<_1<<endl;
 
+    odp<<odp_1<<endl;
 
-//zad2
-    int _2=0;
-    for(const auto& i:data){
-        string rev=string(i.rbegin(), i.rend());
-        uint64_t n=stoi(i)+stoi(rev);
-        if(isPalindrome(to_string(n))){
-            //cout<<"["<<n<<"] TAK\n";
-            _2++;
-        }
-        //else cout<<"["<<n<<"] NIE\n";
+    int odp_2=0;
+
+    for(int i=0; i<1000; i++)
+    {
+        if(czy_palindrom(liczby[i]+odwroc_liczbe(liczby[i]))==true) odp_2++;
     }
-    cout<<"zad2: "<<_2<<endl;
 
+    odp<<odp_2<<endl;
 
+    int odp_3[8];
+    for(int i=0; i<8; i++)
+    {
+        odp_3[i]=0;
+    }
 
-//zad3
-    uint64_t _3[8];
-    for(int i=0;i<8;i++)_3[i]=0;
-    uint64_t max1=0, min1=1000000000;
+    int max_moc_1=0, min_moc_1=999999999;
 
-    for(auto& i:data){
-        //cout<<i<<endl;
-        string temp=i;
-        temp.erase(temp.size()-1);
-        int k=0;
-        int foo=1;
-        while(temp.size()>1){
-            k++;
-            foo=1;
-            for(char c:temp){
-                //cout<<c<<" ";
-                foo*=(c-'0');
-            }
-            //cout<<endl;
-            temp=to_string(foo);
-            foo=1;
+    for(int i=0; i<1000; i++)
+    {
+        int moc=0, liczba=liczby[i];
+        while(liczba>9)
+        {
+            liczba=iloczyn_cyfr(liczba);
+            moc++;
         }
-        //cout<<"["<<k<<"]\n";
-
-        if(k<9)_3[k-1]++;
-        if(k==1){
-            if(stoi(i)>max1)max1=stoi(i);
-            if(stoi(i)<min1)min1=stoi(i);
+        if(moc<9)odp_3[moc-1]++;
+        if(moc==1)
+        {
+            if(liczby[i]>max_moc_1) max_moc_1=liczby[i];
+            if(liczby[i]<min_moc_1) min_moc_1=liczby[i];
         }
     }
 
-    cout<<"zad3: ";
-    for(int i=0;i<8;i++)cout<<_3[i]<<" ";
-    cout<<"max: "<<max1<<" min: "<<min1<<endl;
+    for(int i=0; i<8; i++)
+    {
+        odp<<odp_3[i]<<" ";
+    }
+    odp<<endl<<min_moc_1<<" "<<max_moc_1<<endl;
 
-    file.close();
-
+    plik.close();
+    odp.close();
     return 0;
 }
